@@ -33,6 +33,11 @@ pub struct Config {
     #[serde(rename = "timeoutCommit")] pub timeout_commit: Option<u64>,
 }
 
+/// Tendermint Timer information
+///
+/// Providing the timeout threshold for each step in Tendermint algorithm
+///
+/// Including: Propose, Prevote, Precommit, Commit
 #[derive(Debug, Clone)]
 pub struct TendermintTimer {
     pub propose: Duration,
@@ -42,6 +47,13 @@ pub struct TendermintTimer {
 }
 
 impl Default for TendermintTimer {
+    /// Set default value for the time duration of each step
+    ///
+    /// The default value are following:
+    /// - Propose: 2400,
+    /// - Prevote: 100,
+    /// - Precommit: 100,
+    /// - Commit: 400
     fn default() -> Self {
         TendermintTimer {
             propose: Duration::from_millis(2400),

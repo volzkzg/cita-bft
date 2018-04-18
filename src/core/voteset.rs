@@ -24,6 +24,10 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use util::{H256, Hashable, BLOCKLIMIT};
 
+/// A vote-collector stores every votes in the process of one specific height
+///
+/// Using LRU algorithm (discard the least recent used item) based Cache to
+/// store all votes in recent heights
 // height -> round collector
 #[derive(Debug)]
 pub struct VoteCollector {
@@ -31,12 +35,26 @@ pub struct VoteCollector {
 }
 
 impl VoteCollector {
+    /// Initialization of a VoteCollector
+    ///
+    /// The default size of LRU Cache is 16.
     pub fn new() -> Self {
         VoteCollector {
             votes: LruCache::new(16),
         }
     }
 
+    /// Add a specific vote to this VoteCollector
+    ///
+    /// The following information are needed to add this vote:
+    /// - height: the height of this vote
+    /// - round: the round of this vote
+    /// - step: the step of this vote, i.e, prevote or precommit
+    /// - sender: the address of the node which this vote belongs to
+    /// - vote: the VoteMessage this vote contains
+    ///
+    /// If the HeightVotesCollector for this specific height is not exist,
+    /// then generate a new HeightVotesCollector and insert it to this VoteCollector
     pub fn add(&mut self, height: usize, round: usize, step: Step, sender: Address, vote: VoteMessage) -> bool {
         if self.votes.contains_key(&height) {
             self.votes
@@ -51,6 +69,12 @@ impl VoteCollector {
         }
     }
 
+    /// Get the voteset using VotesCollector.
+    ///
+    /// The following information are needed to get:
+    /// - height: the height of this voteset
+    /// - round: the round of this voteset
+    /// - step: the step of this vote, i.e, prevote or precommit
     pub fn get_voteset(&mut self, height: usize, round: usize, step: Step) -> Option<VoteSet> {
         if self.votes.contains_key(&height) {
             self.votes
